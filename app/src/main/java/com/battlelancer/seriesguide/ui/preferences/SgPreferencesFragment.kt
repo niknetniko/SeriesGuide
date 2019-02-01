@@ -10,18 +10,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Vibrator
-import android.preference.ListPreference
-import android.preference.Preference
-import android.preference.PreferenceFragment
 import android.preference.PreferenceManager
-import android.preference.PreferenceScreen
-import android.preference.SwitchPreference
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.edit
 import androidx.core.content.getSystemService
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.battlelancer.seriesguide.R
 import com.battlelancer.seriesguide.SgApp
 import com.battlelancer.seriesguide.appwidget.ListWidgetProvider
@@ -54,24 +53,22 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-class SgPreferencesFragment : PreferenceFragment(),
+class SgPreferencesFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val settings = arguments?.getString(SeriesGuidePreferences.EXTRA_SETTINGS_SCREEN)
         when (settings) {
             null -> {
-                addPreferencesFromResource(R.xml.settings_root)
+                setPreferencesFromResource(R.xml.settings_root, rootKey)
                 setupRootSettings()
             }
             KEY_SCREEN_BASIC -> {
-                addPreferencesFromResource(R.xml.settings_basic)
+                setPreferencesFromResource(R.xml.settings_basic, rootKey)
                 setupBasicSettings()
             }
             KEY_SCREEN_NOTIFICATIONS -> {
-                addPreferencesFromResource(R.xml.settings_notifications)
+                setPreferencesFromResource(R.xml.settings_notifications, rootKey)
                 setupNotificationSettings()
             }
         }
@@ -82,7 +79,7 @@ class SgPreferencesFragment : PreferenceFragment(),
         findPreference(KEY_CLEAR_CACHE).setOnPreferenceClickListener {
             // try to open app info where user can clear app cache folders
             var intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.parse("package:" + activity.packageName)
+            intent.data = Uri.parse("package:" + activity!!.packageName)
             if (!Utils.tryStartActivity(activity, intent, false)) {
                 // try to open all apps view if detail view not available
                 intent = Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
@@ -140,9 +137,9 @@ class SgPreferencesFragment : PreferenceFragment(),
                         Shadows.getInstance().resetShadowColor()
 
                         // restart to apply new theme, go back to this settings screen
-                        TaskStackBuilder.create(activity)
+                        TaskStackBuilder.create(activity!!)
                             .addNextIntent(Intent(activity, ShowsActivity::class.java))
-                            .addNextIntent(activity.intent)
+                            .addNextIntent(activity!!.intent)
                             .startActivities()
                     }
                     true
@@ -160,7 +157,7 @@ class SgPreferencesFragment : PreferenceFragment(),
         )
 
         // set current value of auto-update pref
-        (findPreference(UpdateSettings.KEY_AUTOUPDATE) as SwitchPreference).isChecked =
+        (findPreference(UpdateSettings.KEY_AUTOUPDATE) as SwitchPreferenceCompat).isChecked =
             SgSyncAdapter.isSyncAutomatically(activity)
     }
 
@@ -205,7 +202,7 @@ class SgPreferencesFragment : PreferenceFragment(),
             }
         } else {
             enabledPref.onPreferenceChangeListener = sNoOpChangeListener
-            (enabledPref as SwitchPreference).isChecked = false
+            (enabledPref as SwitchPreferenceCompat).isChecked = false
             enabledPref.setSummary(R.string.onlyx)
             thresholdPref.isEnabled = false
             selectionPref.isEnabled = false
@@ -259,10 +256,9 @@ class SgPreferencesFragment : PreferenceFragment(),
     }
 
     override fun onPreferenceTreeClick(
-        preferenceScreen: PreferenceScreen,
         preference: Preference
     ): Boolean {
-        val key = preference.key ?: return super.onPreferenceTreeClick(preferenceScreen, preference)
+        val key = preference.key ?: return super.onPreferenceTreeClick(preference)
 
         // other screens
         if (key.startsWith("screen_")) {
@@ -359,20 +355,20 @@ class SgPreferencesFragment : PreferenceFragment(),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
                     .putExtra(Settings.EXTRA_CHANNEL_ID, SgApp.NOTIFICATION_CHANNEL_EPISODES)
-                    .putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, activity!!.packageName)
                 // at least NVIDIA Shield (8.0.0) can not handle this, so guard
                 Utils.tryStartActivity(activity, intent, true)
             }
             return true
         }
         if (KEY_ABOUT == key) {
-            val ft = fragmentManager.beginTransaction()
+            val ft = fragmentManager!!.beginTransaction()
             ft.replace(R.id.containerSettings, AboutPreferencesFragment())
             ft.addToBackStack(null)
             ft.commit()
             return true
         }
-        return super.onPreferenceTreeClick(preferenceScreen, preference)
+        return super.onPreferenceTreeClick(preference)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -418,7 +414,7 @@ class SgPreferencesFragment : PreferenceFragment(),
             if (NotificationSettings.KEY_VIBRATE == key
                 && NotificationSettings.isNotificationVibrating(pref.context)) {
                 // demonstrate vibration pattern used by SeriesGuide
-                val vibrator = activity.getSystemService<Vibrator>()
+                val vibrator = activity!!.getSystemService<Vibrator>()
                 vibrator?.vibrate(NotificationService.VIBRATION_PATTERN, -1)
             }
             if (StreamingSearch.KEY_SETTING_SERVICE == key) {
@@ -429,7 +425,7 @@ class SgPreferencesFragment : PreferenceFragment(),
         // pref changes that require the notification service to be reset
         if (DisplaySettings.KEY_SHOWS_TIME_OFFSET == key
             || NotificationSettings.KEY_THRESHOLD == key) {
-            resetAndRunNotificationsService(activity)
+            resetAndRunNotificationsService(activity!!)
         }
 
         // pref changes that require the widgets to be updated
@@ -449,7 +445,7 @@ class SgPreferencesFragment : PreferenceFragment(),
 
                 val values = ContentValues()
                 values.put(SeriesGuideContract.Episodes.LAST_UPDATED, 0)
-                activity.contentResolver
+                activity!!.contentResolver
                     .update(SeriesGuideContract.Episodes.CONTENT_URI, values, null, null)
             }.start()
         }
@@ -457,7 +453,7 @@ class SgPreferencesFragment : PreferenceFragment(),
         // Toggle auto-update on SyncAdapter
         if (UpdateSettings.KEY_AUTOUPDATE == key) {
             if (pref != null) {
-                val autoUpdatePref = pref as SwitchPreference
+                val autoUpdatePref = pref as SwitchPreferenceCompat
                 SgSyncAdapter.setSyncAutomatically(activity, autoUpdatePref.isChecked)
             }
         }
@@ -492,7 +488,7 @@ class SgPreferencesFragment : PreferenceFragment(),
 
     private fun updateSelectionSummary(selectionPref: Preference) {
         val countOfShowsNotifyOn = DBUtils.getCountOf(
-            activity.contentResolver,
+            activity!!.contentResolver,
             SeriesGuideContract.Shows.CONTENT_URI,
             SeriesGuideContract.Shows.SELECTION_NOTIFY, null, 0
         )
@@ -503,7 +499,7 @@ class SgPreferencesFragment : PreferenceFragment(),
     }
 
     private fun updateStreamSearchServiceSummary(pref: Preference) {
-        val serviceOrEmptyOrNull = StreamingSearch.getServiceOrEmptyOrNull(activity)
+        val serviceOrEmptyOrNull = StreamingSearch.getServiceOrEmptyOrNull(activity!!)
         when {
             serviceOrEmptyOrNull == null -> pref.summary = null
             serviceOrEmptyOrNull.isEmpty() -> pref.setSummary(R.string.action_turn_off)
