@@ -458,7 +458,7 @@ class SgPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onEvent(event: SeriesGuidePreferences.UpdateSummariesEvent) {
+    fun onEvent(@Suppress("UNUSED_PARAMETER") event: SeriesGuidePreferences.UpdateSummariesEvent) {
         if (!isResumed) {
             return
         }
