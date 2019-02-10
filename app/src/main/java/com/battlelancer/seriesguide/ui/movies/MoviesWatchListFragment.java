@@ -62,7 +62,7 @@ public class MoviesWatchListFragment extends MoviesBaseFragment {
     @Override
     int getTabPosition(boolean showingNowTab) {
         return showingNowTab
-                ? MoviesActivity.TAB_POSITION_WATCHLIST_WITH_NOW
+                ? MoviesActivity.TAB_POSITION_WATCHLIST_WITH_TRAKT
                 : MoviesActivity.TAB_POSITION_WATCHLIST_DEFAULT;
     }
 }

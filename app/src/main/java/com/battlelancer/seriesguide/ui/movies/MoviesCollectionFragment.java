@@ -63,7 +63,7 @@ public class MoviesCollectionFragment extends MoviesBaseFragment {
     @Override
     int getTabPosition(boolean showingNowTab) {
         return showingNowTab
-                ? MoviesActivity.TAB_POSITION_COLLECTION_WITH_NOW
+                ? MoviesActivity.TAB_POSITION_COLLECTION_WITH_TRAKT
                 : MoviesActivity.TAB_POSITION_COLLECTION_DEFAULT;
     }
 }

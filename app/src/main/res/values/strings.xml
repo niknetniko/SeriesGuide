@@ -234,6 +234,7 @@
     <string name="error_name_already_exists">A list with this name already exists</string>
 
     <!-- Movies -->
+    <string name="title_watched">Watched</string>
     <string name="title_discover">Discover</string>
     <string name="title_popular">Popular</string>
     <string name="title_digital_releases">Digital releases</string>
@@ -248,6 +249,7 @@
     <string name="movies_search_hint">Type a movie title</string>
     <string name="movies_collection_empty">You have not added movies to your collection</string>
     <string name="movies_watchlist_empty">You have not added movies to your watchlist</string>
+    <string name="movies_watched_empty">You have not watched any movies</string>
     <string name="trailer">Trailer</string>
     <string name="movie_cast">Cast</string>
     <string name="movie_crew">Crew</string>

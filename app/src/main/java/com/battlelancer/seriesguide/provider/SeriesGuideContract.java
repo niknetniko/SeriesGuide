@@ -1054,6 +1054,8 @@ public class SeriesGuideContract {
 
         public static final String SELECTION_UNWATCHED = Movies.WATCHED + "=0";
 
+        public static final String SELECTION_WATCHED = Movies.WATCHED + "=1";
+
         /** Default sort order. */
         public static final String SORT_TITLE_ALPHABETICAL = Movies.TITLE + " COLLATE NOCASE ASC";
 

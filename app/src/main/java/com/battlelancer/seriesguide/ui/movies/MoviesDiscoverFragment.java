@@ -134,7 +134,9 @@ public class MoviesDiscoverFragment extends Fragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventTabClick(MoviesActivity.MoviesTabClickEvent event) {
-        if (event.position == MoviesActivity.TAB_POSITION_DISCOVER) {
+        int value = event.showingNowTab ?
+                MoviesActivity.TAB_POSITION_DISCOVER_WITH_TRAKT : MoviesActivity.TAB_POSITION_DISCOVER_DEFAULT;
+        if (event.position == value) {
             recyclerView.smoothScrollToPosition(0);
         }
     }

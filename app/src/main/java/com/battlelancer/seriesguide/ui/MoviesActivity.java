@@ -19,6 +19,7 @@ import com.battlelancer.seriesguide.ui.movies.MoviesDiscoverFragment;
 import com.battlelancer.seriesguide.ui.movies.MoviesNowFragment;
 import com.battlelancer.seriesguide.ui.movies.MoviesSearchActivity;
 import com.battlelancer.seriesguide.ui.movies.MoviesWatchListFragment;
+import com.battlelancer.seriesguide.ui.movies.MoviesWatchedFragment;
 import com.battlelancer.seriesguide.widgets.SlidingTabLayout;
 import org.greenrobot.eventbus.EventBus;
 
@@ -42,14 +43,17 @@ public class MoviesActivity extends BaseTopActivity {
     public static final int NOW_TRAKT_FRIENDS_LOADER_ID = 102;
     public static final int WATCHLIST_LOADER_ID = 103;
     public static final int COLLECTION_LOADER_ID = 104;
+    public static final int WATCHED_LOADER_ID = 105;
 
-    public static final int TAB_POSITION_DISCOVER = 0;
+    public static final int TAB_POSITION_DISCOVER_DEFAULT = 0;
     public static final int TAB_POSITION_WATCHLIST_DEFAULT = 1;
     public static final int TAB_POSITION_COLLECTION_DEFAULT = 2;
-    public static final int TAB_POSITION_NOW = 1;
-    public static final int TAB_POSITION_WATCHLIST_WITH_NOW = 2;
-    public static final int TAB_POSITION_COLLECTION_WITH_NOW = 3;
-    private static final int TAB_COUNT_WITH_TRAKT = 4;
+    public static final int TAB_POSITION_WATCHED = 0;
+    public static final int TAB_POSITION_DISCOVER_WITH_TRAKT = 1;
+    public static final int TAB_POSITION_NOW = 2;
+    public static final int TAB_POSITION_WATCHLIST_WITH_TRAKT = 3;
+    public static final int TAB_POSITION_COLLECTION_WITH_TRAKT = 4;
+    private static final int TAB_COUNT_WITH_TRAKT = 5;
 
     @BindView(R.id.viewPagerTabs) ViewPager viewPager;
     @BindView(R.id.tabLayoutTabs) SlidingTabLayout tabs;
@@ -87,6 +91,11 @@ public class MoviesActivity extends BaseTopActivity {
             }
         });
         tabsAdapter = new TabStripAdapter(getSupportFragmentManager(), this, viewPager, tabs);
+        // trakt-only tabs should only be visible if connected
+        if (showNowTab) {
+            // watched
+            tabsAdapter.addTab(R.string.title_watched, MoviesWatchedFragment.class, null);
+        }
         // discover
         tabsAdapter.addTab(R.string.title_discover, MoviesDiscoverFragment.class, null);
         // trakt-only tabs should only be visible if connected
